@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wong.ffwb.scheduling_system.dao.EmployeeDao">
+
+    <resultMap type="com.wong.ffwb.scheduling_system.model.entity.Employee" id="EmployeeMap">
+        <result property="employeeId" column="employee_id" jdbcType="INTEGER"/>
+        <result property="employeeName" column="employee_name" jdbcType="VARCHAR"/>
+        <result property="employeeEmail" column="employee_email" jdbcType="VARCHAR"/>
+        <result property="employeePosition" column="employee_position" jdbcType="INTEGER"/>
+        <result property="employeePreferenceId" column="employee_preference_id" jdbcType="INTEGER"/>
+        <result property="employeeStoreId" column="employee_store_id" jdbcType="INTEGER"/>
+        <result property="employeeGender" column="employee_gender" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!-- 批量插入 -->
+    <insert id="insertBatch" keyProperty="employeeId" useGeneratedKeys="true">
+        insert into scheduling_system.employee(employee_name, employee_email, employee_position, employee_preference_id,
+        employee_store_id, employee_gender)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.employeeName}, #{entity.employeeEmail}, #{entity.employeePosition},
+            #{entity.employeePreferenceId}, #{entity.employeeStoreId}, #{entity.employeeGender})
+        </foreach>
+    </insert>
+    <!-- 批量插入或按主键更新 -->
+    <insert id="insertOrUpdateBatch" keyProperty="employeeId" useGeneratedKeys="true">
+        insert into scheduling_system.employee(employee_name, employee_email, employee_position, employee_preference_id,
+        employee_store_id, employee_gender)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.employeeName}, #{entity.employeeEmail}, #{entity.employeePosition},
+            #{entity.employeePreferenceId}, #{entity.employeeStoreId}, #{entity.employeeGender})
+        </foreach>
+        on duplicate key update
+        employee_name = values(employee_name) , employee_email = values(employee_email) , employee_position =
+        values(employee_position) , employee_preference_id = values(employee_preference_id) , employee_store_id =
+        values(employee_store_id) , employee_gender = values(employee_gender)
+    </insert>
+
+</mapper>
+

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wong.ffwb.scheduling_system.dao.RuleDao">
+
+    <resultMap type="com.wong.ffwb.scheduling_system.model.entity.Rule" id="RuleMap">
+        <result property="ruleId" column="rule_id" jdbcType="INTEGER"/>
+        <result property="ruleStoreId" column="rule_store_id" jdbcType="INTEGER"/>
+        <result property="rulePrepareTime" column="rule_prepare_time" jdbcType="NUMERIC"/>
+        <result property="rulePrepareNumber" column="rule_prepare_number" jdbcType="INTEGER"/>
+        <result property="rulePreparePosition" column="rule_prepare_position" jdbcType="INTEGER"/>
+        <result property="ruleDemandNumber" column="rule_demand_number" jdbcType="NUMERIC"/>
+        <result property="ruleDutyPosition" column="rule_duty_position" jdbcType="INTEGER"/>
+        <result property="ruleDutyNumber" column="rule_duty_number" jdbcType="INTEGER"/>
+        <result property="ruleCloseTime" column="rule_close_time" jdbcType="NUMERIC"/>
+        <result property="ruleCloseNumber1" column="rule_close_number1" jdbcType="INTEGER"/>
+        <result property="ruleCloseNumber2" column="rule_close_number2" jdbcType="INTEGER"/>
+        <result property="ruleClosePosition" column="rule_close_position" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <!-- 批量插入 -->
+    <insert id="insertBatch" keyProperty="ruleId" useGeneratedKeys="true">
+        insert into scheduling_system.rule(rule_store_id, rule_prepare_time, rule_prepare_number, rule_prepare_position,
+        rule_demand_number, rule_duty_position, rule_duty_number, rule_close_time, rule_close_number1,
+        rule_close_number2, rule_close_position)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.ruleStoreId}, #{entity.rulePrepareTime}, #{entity.rulePrepareNumber},
+            #{entity.rulePreparePosition}, #{entity.ruleDemandNumber}, #{entity.ruleDutyPosition},
+            #{entity.ruleDutyNumber}, #{entity.ruleCloseTime}, #{entity.ruleCloseNumber1}, #{entity.ruleCloseNumber2},
+            #{entity.ruleClosePosition})
+        </foreach>
+    </insert>
+    <!-- 批量插入或按主键更新 -->
+    <insert id="insertOrUpdateBatch" keyProperty="ruleId" useGeneratedKeys="true">
+        insert into scheduling_system.rule(rule_store_id, rule_prepare_time, rule_prepare_number, rule_prepare_position,
+        rule_demand_number, rule_duty_position, rule_duty_number, rule_close_time, rule_close_number1,
+        rule_close_number2, rule_close_position)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.ruleStoreId}, #{entity.rulePrepareTime}, #{entity.rulePrepareNumber},
+            #{entity.rulePreparePosition}, #{entity.ruleDemandNumber}, #{entity.ruleDutyPosition},
+            #{entity.ruleDutyNumber}, #{entity.ruleCloseTime}, #{entity.ruleCloseNumber1}, #{entity.ruleCloseNumber2},
+            #{entity.ruleClosePosition})
+        </foreach>
+        on duplicate key update
+        rule_store_id = values(rule_store_id) , rule_prepare_time = values(rule_prepare_time) , rule_prepare_number =
+        values(rule_prepare_number) , rule_prepare_position = values(rule_prepare_position) , rule_demand_number =
+        values(rule_demand_number) , rule_duty_position = values(rule_duty_position) , rule_duty_number =
+        values(rule_duty_number) , rule_close_time = values(rule_close_time) , rule_close_number1 =
+        values(rule_close_number1) , rule_close_number2 = values(rule_close_number2) , rule_close_position =
+        values(rule_close_position)
+    </insert>
+
+</mapper>
+

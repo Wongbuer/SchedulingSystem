@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wong.ffwb.scheduling_system.dao.StoreDao">
+
+    <resultMap type="com.wong.ffwb.scheduling_system.model.entity.Store" id="StoreMap">
+        <result property="storeId" column="store_id" jdbcType="INTEGER"/>
+        <result property="storeName" column="store_name" jdbcType="VARCHAR"/>
+        <result property="storeAddress" column="store_address" jdbcType="VARCHAR"/>
+        <result property="storeTrafficId" column="store_traffic_id" jdbcType="INTEGER"/>
+        <result property="storeSize" column="store_size" jdbcType="NUMERIC"/>
+    </resultMap>
+
+    <!-- 批量插入 -->
+    <insert id="insertBatch" keyProperty="storeId" useGeneratedKeys="true">
+        insert into scheduling_system.store(store_name, store_address, store_traffic_id, store_size)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.storeName}, #{entity.storeAddress}, #{entity.storeTrafficId}, #{entity.storeSize})
+        </foreach>
+    </insert>
+    <!-- 批量插入或按主键更新 -->
+    <insert id="insertOrUpdateBatch" keyProperty="storeId" useGeneratedKeys="true">
+        insert into scheduling_system.store(store_name, store_address, store_traffic_id, store_size)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.storeName}, #{entity.storeAddress}, #{entity.storeTrafficId}, #{entity.storeSize})
+        </foreach>
+        on duplicate key update
+        store_name = values(store_name) , store_address = values(store_address) , store_traffic_id =
+        values(store_traffic_id) , store_size = values(store_size)
+    </insert>
+
+</mapper>
+

@@ -1,0 +1,31 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: scheduling_system
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql:///scheduling_system?serverTimezone=UTC
+    username: 'root'
+    password: '010519'
+  redis:
+    port: 6380
+    password: '010519'
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+mybatis-plus:
+  global-config:
+    db-config:
+      id-type: assign_id
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath:/mapper/**/*.xml
+knife4j:
+  setting:
+    language: zh-CN
+  enable: true
+amap:
+  key: 6931e9a17412b231089648fb2d8bc55f
