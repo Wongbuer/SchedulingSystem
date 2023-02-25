@@ -130,7 +130,7 @@ public class WorkingSchedulingController {
     }
 
     @GetMapping("/test")
-    public BaseResponse<?> test(String dataStr) {
+    public BaseResponse<?> test( @RequestParam("dateStr") String dataStr) {
         List<WorkingScheduling> workingSchedulingList = workingSchedulingDao.selectWorkingSchedulingByDate(dataStr);
         return ResultUtils.success(workingSchedulingList);
     }
