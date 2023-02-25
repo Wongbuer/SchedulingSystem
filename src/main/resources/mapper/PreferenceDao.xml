@@ -4,7 +4,7 @@
 
     <resultMap type="com.wong.ffwb.scheduling_system.model.entity.Preference" id="PreferenceMap">
         <result property="prefId" column="pref_id" jdbcType="INTEGER"/>
-        <result property="prefContent" column="pref_content" jdbcType="VARCHAR"/>
+        <result property="preferenceContent" column="pref_content" jdbcType="VARCHAR"/>
     </resultMap>
 
     <!-- 批量插入 -->

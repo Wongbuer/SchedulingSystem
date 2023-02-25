@@ -1,7 +1,6 @@
 package com.wong.ffwb.scheduling_system.service;
 
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wong.ffwb.scheduling_system.common.BaseResponse;
 import com.wong.ffwb.scheduling_system.common.PageRequest;
@@ -26,5 +25,9 @@ public interface EmployeeService extends IService<Employee> {
     BaseResponse<Boolean> updateOne(Employee employee);
 
     BaseResponse<Boolean> delete(List<Long> idList);
+
+    BaseResponse<List<Employee>> selectBatchWithContent();
+
+    BaseResponse<Employee> selectOneWithContentById(Long employeeId);
 }
 

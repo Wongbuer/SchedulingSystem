@@ -24,17 +24,16 @@ public abstract class AbstractFiller implements Filler {
     /**
      * 填充操作
      *
-     * @param feasibleSolution 可行解决方案
+     * @param chromosomeUnitList 染色体单位列表
      * @return {@link List}<{@link WorkUnit}>
      */
     @Override
-    public List<WorkUnit> fillingOperation(List<Individual.ChromosomeUnit> feasibleSolution) {
-        List<WorkUnit> list = new ArrayList<>(feasibleSolution.size());
-        processingPriority(feasibleSolution);
-//        filling();
-        return list;
+    public List<WorkUnit> fillingOperation(List<Individual.ChromosomeUnit> chromosomeUnitList) {
+        processingPriority(chromosomeUnitList);
+        return filling(employeeScoreDTOList, chromosomeUnitList);
     }
 
     abstract void processingPriority(List<Individual.ChromosomeUnit> list);
-    abstract void filling(List<EmployeeScoreDTO> employeeScoreDTOList, List<Individual.ChromosomeUnit> list);
+
+    abstract List<WorkUnit> filling(List<EmployeeScoreDTO> employeeScoreDTOList, List<Individual.ChromosomeUnit> chromosomeUnitList);
 }

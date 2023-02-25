@@ -13,7 +13,6 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -24,9 +23,9 @@ import java.util.stream.IntStream;
  */
 public class EmployeeFiller extends AbstractFiller {
     private final Week week;
-    private Set<EmployeeScoreDTO> first = new HashSet<>();
-    private Set<EmployeeScoreDTO> second = new HashSet<>();
-    private Set<EmployeeScoreDTO> third = new HashSet<>();
+    private double exchangeRate;
+    private final Map<Individual.ChromosomeUnit, EmployeeScoreDTO> dayCacheMap = new HashMap<>();
+    private final Map<Individual.ChromosomeUnit, EmployeeScoreDTO> hourCacheMap = new HashMap<>();
 
 
     /**
@@ -51,7 +50,7 @@ public class EmployeeFiller extends AbstractFiller {
         // 获取所有班次时间
 //        HashSet<Double> durationSet = list.stream().mapToDouble(Individual.ChromosomeUnit::getDuration).collect(HashSet::new, Set::add, Set::addAll);
         // 遍历所有员工并判断优先级
-        employeeScoreDTOList.forEach(employeeScoreDTO -> {
+        for (EmployeeScoreDTO employeeScoreDTO : employeeScoreDTOList) {
             int score = 0;
             PreferenceContent preferenceContent = employeeScoreDTO.getEmployee().getPreferenceContent();
             List<Integer> dayPreference = new ArrayList<>();
@@ -65,7 +64,7 @@ public class EmployeeFiller extends AbstractFiller {
                 // 解析工作时长偏好
                 timePreference = parseWorkingTimePreference(preferenceContent.getWorkingTimePreference());
             }
-            if (dayPreference.indexOf(week.ordinal()) != -1) {
+            if (dayPreference.contains(week.ordinal())) {
                 score += 4;
             }
             if (hoursPreference.size() != 0) {
@@ -78,23 +77,111 @@ public class EmployeeFiller extends AbstractFiller {
             employeeScoreDTO.setDayPreference(dayPreference);
             employeeScoreDTO.setHoursPreference(hoursPreference);
             employeeScoreDTO.setTimePreference(timePreference);
-        });
+        }
     }
 
     @Override
-    void filling(List<EmployeeScoreDTO> employeeScoreDTOList, List<Individual.ChromosomeUnit> list) {
-        // 循环遍历班次列表, 并填充员工
-        employeeScoreDTOList = employeeScoreDTOList.stream().sorted(Comparator.comparing(EmployeeScoreDTO::getScore).reversed()).collect(Collectors.toList());
+    List<WorkUnit> filling(List<EmployeeScoreDTO> employeeScoreDTOList, List<Individual.ChromosomeUnit> chromosomeUnitList) {
+        List<EmployeeScoreDTO> dtos = new ArrayList<>(employeeScoreDTOList);
+        List<Individual.ChromosomeUnit> list = new ArrayList<>(chromosomeUnitList);
         List<WorkUnit> workUnitList = new ArrayList<>(list.size());
-        for (Individual.ChromosomeUnit chromosomeUnit : list) {
-            LocalTime beginTime = transformDoubleToTime(chromosomeUnit.getBeginTime());
-            LocalTime endTime = transformDoubleToTime(chromosomeUnit.getEndTime());
-            int position = chromosomeUnit.getPosition();
-            // TODO : 用户填充逻辑
-        }
 
+        // 循环, 直到所有班次都被安排
+//        do {
+//            // 员工分数排序
+//            dtos = dtos.stream()
+//                    .sorted(Comparator.comparing(EmployeeScoreDTO::getScore).reversed())
+//                    .collect(Collectors.toList());
+//            // 提取分数最高员工
+//            EmployeeScoreDTO employeeScoreDTO = dtos.get(0);
+//            int score = employeeScoreDTO.getScore();
+//            // 判断优先级是否为工作日优先级
+//            if ((score & 4) == 4) {
+//                // 移除员工列表
+//                dtos.remove(0);
+//                // 根据职位选择适合班次
+//                Individual.ChromosomeUnit unit = findChromosomeUnitByPosition(list, employeeScoreDTO.getEmployee().getEmployeePosition());
+//                // 移除排班列表
+//                list.remove(unit);
+//                // 添加至工作日偏好缓存
+//                dayCacheMap.put(unit, employeeScoreDTO);
+//            } else if ((score & 2) == 2) {
+//                // 根据时间和职位查找染色体
+//                Individual.ChromosomeUnit unit = findChromosomeUnitByTimeAndPosition(list, employeeScoreDTO);
+//                // 找到对应班次
+//                if (unit != null) {
+//                    list.remove(unit);
+//                    hourCacheMap.put(unit, employeeScoreDTO);
+//                } else {
+//                    // 小于交换率
+//                    if (Math.random() < exchangeRate) {
+//                        Individual.ChromosomeUnit unit1 = findChromosomeUnitByTimeAndPosition(dayCacheMap.keySet().stream().toList(), employeeScoreDTO);
+//                        if (unit1 != null) {
+//
+//                        }
+//                    }
+//                }
+//            } else if ((score & 1) == 1) {
+//
+//            }
+//        } while (true);
+        for (EmployeeScoreDTO employeeScoreDTO : employeeScoreDTOList) {
+            Individual.ChromosomeUnit unit = list.get(0);
+            LocalTime beginTime = transformDoubleToTime(unit.getBeginTime());
+            LocalTime endTime = transformDoubleToTime(unit.getEndTime());
+            WorkUnit workUnit = WorkUnit.builder()
+                    .employee(employeeScoreDTO.getEmployee())
+                    .beginTime(beginTime)
+                    .endTime(endTime)
+                    .build();
+            workUnitList.add(workUnit);
+            list.remove(unit);
+        }
+        if (list.size() > 0) {
+            for (Individual.ChromosomeUnit unit : list) {
+                int empSize = employeeScoreDTOList.size();
+                EmployeeScoreDTO dto = employeeScoreDTOList.get((int) (Math.random() * empSize));
+                LocalTime beginTime = transformDoubleToTime(unit.getBeginTime());
+                LocalTime endTime = transformDoubleToTime(unit.getEndTime());
+                WorkUnit workUnit = WorkUnit.builder()
+                        .employee(dto.getEmployee())
+                        .beginTime(beginTime)
+                        .endTime(endTime)
+                        .build();
+                workUnitList.add(workUnit);
+            }
+        }
+        return workUnitList;
     }
-    
+
+    private Individual.ChromosomeUnit findChromosomeUnitByPosition(List<Individual.ChromosomeUnit> list, int position) {
+        for (Individual.ChromosomeUnit chromosomeUnit : list) {
+            if (chromosomeUnit.getPosition() == position)
+                return chromosomeUnit;
+        }
+        return null;
+    }
+
+    /**
+     * 根据时间和职位查找染色体
+     *
+     * @param list             列表
+     * @param employeeScoreDTO 员工分数dto
+     * @return {@link Individual.ChromosomeUnit}
+     */
+    private Individual.ChromosomeUnit findChromosomeUnitByTimeAndPosition(List<Individual.ChromosomeUnit> list, EmployeeScoreDTO employeeScoreDTO) {
+        for (Individual.ChromosomeUnit chromosomeUnit : list) {
+            double beginTime = chromosomeUnit.getBeginTime();
+            double endTime = chromosomeUnit.getEndTime();
+            List<Double> hoursPreference = employeeScoreDTO.getHoursPreference();
+            Integer position = employeeScoreDTO.getEmployee().getEmployeePosition();
+            if (hoursPreference.contains(beginTime) && hoursPreference.contains(endTime) && chromosomeUnit.getPosition() == position) {
+                return chromosomeUnit;
+            }
+        }
+        return list.get(0);
+    }
+
     private EmployeeScoreDTO findEmployeeScoreDTOByPosition(List<EmployeeScoreDTO> list, int position) {
         for (EmployeeScoreDTO employeeScoreDTO : list) {
             if (employeeScoreDTO.getEmployee().getEmployeePosition() == position) {

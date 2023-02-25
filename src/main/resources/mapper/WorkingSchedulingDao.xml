@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wong.ffwb.scheduling_system.dao.WorkingSchedulingDao">
+
+    <resultMap type="com.wong.ffwb.scheduling_system.model.entity.WorkingScheduling" id="WorkingSchedulingMap">
+        <result property="schedulingId" column="scheduling_id" jdbcType="BIGINT"/>
+        <result property="schedulingBeginTime" column="scheduling_begin_time" jdbcType="TIMESTAMP"/>
+        <result property="schedulingEndTime" column="scheduling_end_time" jdbcType="TIMESTAMP"/>
+        <result property="schedulingEmployeeId" column="scheduling_employee_id" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <resultMap type="com.wong.ffwb.scheduling_system.model.entity.WorkingScheduling" id="withEmployeeMap">
+        <result property="schedulingId" column="scheduling_id" jdbcType="BIGINT"/>
+        <result property="schedulingBeginTime" column="scheduling_begin_time" jdbcType="TIMESTAMP"/>
+        <result property="schedulingEndTime" column="scheduling_end_time" jdbcType="TIMESTAMP"/>
+        <result property="schedulingEmployeeId" column="scheduling_employee_id" jdbcType="BIGINT"/>
+        <association property="employee" javaType="com.wong.ffwb.scheduling_system.model.entity.Employee" resultMap="com.wong.ffwb.scheduling_system.dao.EmployeeDao.EmployeeMap"/>
+    </resultMap>
+
+    <!-- 批量插入 -->
+    <insert id="insertBatch" keyProperty="schedulingId" useGeneratedKeys="true">
+        insert into scheduling_system.working_scheduling(scheduling_begin_time, scheduling_end_time,
+        scheduling_employee_id)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.schedulingBeginTime}, #{entity.schedulingEndTime}, #{entity.schedulingEmployeeId})
+        </foreach>
+    </insert>
+    <!-- 批量插入或按主键更新 -->
+    <insert id="insertOrUpdateBatch" keyProperty="schedulingId" useGeneratedKeys="true">
+        insert into scheduling_system.working_scheduling(scheduling_begin_time, scheduling_end_time,
+        scheduling_employee_id)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.schedulingBeginTime}, #{entity.schedulingEndTime}, #{entity.schedulingEmployeeId})
+        </foreach>
+        on duplicate key update
+        scheduling_begin_time = values(scheduling_begin_time) , scheduling_end_time = values(scheduling_end_time) ,
+        scheduling_employee_id = values(scheduling_employee_id)
+    </insert>
+
+    <select id="selectWorkingSchedulingByDate" resultMap="withEmployeeMap" resultType="list">
+        select scheduling_id, scheduling_employee_id, scheduling_begin_time, scheduling_end_time, employee.*
+        from working_scheduling
+        left join employee
+        on working_scheduling.scheduling_employee_id = employee.employee_id
+        <where>
+            <if test="dataStr != null and dataStr != ''">
+                date(scheduling_begin_time) = #{dataStr}
+            </if>
+        </where>
+    </select>
+</mapper>
+

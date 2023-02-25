@@ -57,5 +57,17 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeDao, Employee> impl
         boolean isRemove = removeByIds(idList);
         return ResultUtils.success(isRemove);
     }
+
+    @Override
+    public BaseResponse<List<Employee>> selectBatchWithContent() {
+        List<Employee> employees = baseMapper.selectBatchWithPreferenceContent();
+        return ResultUtils.success(employees);
+    }
+
+    @Override
+    public BaseResponse<Employee> selectOneWithContentById(Long employeeId) {
+        Employee employee = baseMapper.selectOneWithPreferenceContent(employeeId);
+        return ResultUtils.success(employee);
+    }
 }
 

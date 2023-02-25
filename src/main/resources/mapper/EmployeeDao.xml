@@ -12,6 +12,17 @@
         <result property="employeeGender" column="employee_gender" jdbcType="VARCHAR"/>
     </resultMap>
 
+    <resultMap type="com.wong.ffwb.scheduling_system.model.entity.Employee" id="withContentMap">
+        <result property="employeeId" column="employee_id" jdbcType="INTEGER"/>
+        <result property="employeeName" column="employee_name" jdbcType="VARCHAR"/>
+        <result property="employeeEmail" column="employee_email" jdbcType="VARCHAR"/>
+        <result property="employeePosition" column="employee_position" jdbcType="INTEGER"/>
+        <result property="employeeStoreId" column="employee_store_id" jdbcType="INTEGER"/>
+        <result property="employeeGender" column="employee_gender" jdbcType="VARCHAR"/>
+        <result property="preferenceContent" column="pref_content" jdbcType="VARCHAR"/>
+    </resultMap>
+
+
     <!-- 批量插入 -->
     <insert id="insertBatch" keyProperty="employeeId" useGeneratedKeys="true">
         insert into scheduling_system.employee(employee_name, employee_email, employee_position, employee_preference_id,
@@ -36,6 +47,37 @@
         values(employee_position) , employee_preference_id = values(employee_preference_id) , employee_store_id =
         values(employee_store_id) , employee_gender = values(employee_gender)
     </insert>
+
+    <select id="selectBatchWithPreferenceContent" resultMap="withContentMap" resultType="arraylist">
+        select employee_id,
+               employee_name,
+               employee_email,
+               employee_preference_id,
+               employee_position,
+               employee_store_id,
+               employee_gender,
+               p.pref_content
+        from employee e
+                 left join preference p on e.employee_preference_id = p.pref_id;
+    </select>
+    <select id="selectOneWithPreferenceContent"
+            resultType="com.wong.ffwb.scheduling_system.model.entity.Employee" resultMap="withContentMap">
+        select employee_id,
+        employee_name,
+        employee_email,
+        employee_preference_id,
+        employee_position,
+        employee_store_id,
+        employee_gender,
+        p.pref_content
+        from employee e
+        left join preference p on e.employee_preference_id = p.pref_id
+        <where>
+            <if test="employeeId != null">
+                e.employee_id = #{employeeId}
+            </if>
+        </where>
+    </select>
 
 </mapper>
 

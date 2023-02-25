@@ -6,6 +6,5 @@ import com.wong.ffwb.scheduling_system.scheduling.genetic.intef.Individual;
 import java.util.List;
 
 public interface Filler {
-
-    List<WorkUnit> fillingOperation(List<Individual.ChromosomeUnit> feasibleSolution);
+    List<WorkUnit> fillingOperation(List<Individual.ChromosomeUnit> chromosomeUnitList);
 }
