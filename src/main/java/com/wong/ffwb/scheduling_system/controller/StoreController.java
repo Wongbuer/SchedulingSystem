@@ -103,7 +103,7 @@ public class StoreController {
      * @param idList 主键结合
      * @return 删除结果
      */
-    @Operation(summary = "删除数据”")
+    @Operation(summary = "删除数据")
     @Parameters({
             @Parameter(name = "idList", description = "主键结合")
     })

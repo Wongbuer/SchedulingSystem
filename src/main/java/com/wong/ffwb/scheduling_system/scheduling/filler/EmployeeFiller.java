@@ -125,6 +125,7 @@ public class EmployeeFiller extends AbstractFiller {
 //
 //            }
 //        } while (true);
+        Collections.shuffle(employeeScoreDTOList);
         for (EmployeeScoreDTO employeeScoreDTO : employeeScoreDTOList) {
             Individual.ChromosomeUnit unit = list.get(0);
             LocalTime beginTime = transformDoubleToTime(unit.getBeginTime());

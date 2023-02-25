@@ -6,17 +6,7 @@ import com.wong.ffwb.scheduling_system.common.PageRequest;
 import com.wong.ffwb.scheduling_system.common.ResultUtils;
 import com.wong.ffwb.scheduling_system.dao.EmployeeDao;
 import com.wong.ffwb.scheduling_system.dao.WorkingSchedulingDao;
-import com.wong.ffwb.scheduling_system.model.dto.EmployeeScoreDTO;
-import com.wong.ffwb.scheduling_system.model.dto.WorkUnit;
-import com.wong.ffwb.scheduling_system.model.entity.Employee;
 import com.wong.ffwb.scheduling_system.model.entity.WorkingScheduling;
-import com.wong.ffwb.scheduling_system.scheduling.filler.EmployeeFiller;
-import com.wong.ffwb.scheduling_system.scheduling.genetic.impl.AtomizationCrossOverSupport;
-import com.wong.ffwb.scheduling_system.scheduling.genetic.impl.SchedulingEvalSupport;
-import com.wong.ffwb.scheduling_system.scheduling.genetic.impl.SchedulingGeneticAlgorithm;
-import com.wong.ffwb.scheduling_system.scheduling.genetic.impl.SchedulingMutationSupport;
-import com.wong.ffwb.scheduling_system.scheduling.genetic.intef.Individual;
-import com.wong.ffwb.scheduling_system.scheduling.genetic.intef.Population;
 import com.wong.ffwb.scheduling_system.service.EmployeeService;
 import com.wong.ffwb.scheduling_system.service.PreferenceService;
 import com.wong.ffwb.scheduling_system.service.WorkingSchedulingService;
@@ -31,10 +21,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
 
 /**
  * (WorkingScheduling)表控制层
@@ -128,7 +115,7 @@ public class WorkingSchedulingController {
      * @param idList 主键结合
      * @return 删除结果
      */
-    @Operation(summary = "删除数据”")
+    @Operation(summary = "删除数据")
     @Parameters({
             @Parameter(name = "idList", description = "主键结合")
     })
@@ -137,45 +124,15 @@ public class WorkingSchedulingController {
         return workingSchedulingService.delete(idList);
     }
 
+    @GetMapping("/schedulingByDay")
+    public BaseResponse<?> schedulingByDay(String dateStr) {
+        return workingSchedulingService.getSchedulingByDay(dateStr);
+    }
+
     @GetMapping("/test")
-    public BaseResponse<?> test(String dateStr) {
-        List<WorkingScheduling> workingSchedulingList = workingSchedulingDao.selectWorkingSchedulingByDate(dateStr);
-        if (workingSchedulingList.size() > 0) {
-            return ResultUtils.success(workingSchedulingList);
-        }
-        List<EmployeeScoreDTO> employeeScoreDTOList = new LinkedList<>();
-        List<Employee> employees = employeeDao.selectBatchWithPreferenceContent();
-        List<Individual> candidateIndividualList = new ArrayList<>();
-        for (Employee employee : employees) {
-            EmployeeScoreDTO dto = new EmployeeScoreDTO(employee);
-            employeeScoreDTOList.add(dto);
-        }
-        EmployeeFiller filler = new EmployeeFiller(employeeScoreDTOList, dateStr);
-        SchedulingGeneticAlgorithm ga = new SchedulingGeneticAlgorithm(
-                new AtomizationCrossOverSupport(0.9, -1, 10),
-                new SchedulingMutationSupport(0.01, -1),
-                new SchedulingEvalSupport(1, 0),
-                1, 1000000);
-        List<Integer> list = Arrays.asList(0, 1, 1, 2, 3, 4, 4, 5, 5, 7, 8, 6, 5, 5, 5, 4, 4, 3, 3, 2, 2, 2, 1, 1, 1, 1);
-        for (int i = 0; i < 3; i++) {
-            Population population = ga.initPopulation(list);
-            ga.evalPopulation(population);
-            int generation = 1;
-            candidateIndividualList.add(population.getFittest(0));
-            System.out.println("Best solution: " + population.getFittest(0).toString());
-        }
-        candidateIndividualList = candidateIndividualList.stream().sorted(Comparator.comparing(Individual::getFitness).reversed()).collect(Collectors.toList());
-        Individual bestIndividual = candidateIndividualList.get(0);
-        List<WorkUnit> units = filler.fillingOperation(bestIndividual.getChromosomeUnitList());
-        for (WorkUnit unit : units) {
-            WorkingScheduling workingScheduling = new WorkingScheduling();
-                    workingScheduling.setSchedulingEmployeeId(unit.getEmployee().getEmployeeId());
-                    workingScheduling.setSchedulingBeginTime(unit.getBeginTime().atDate(LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
-                    workingScheduling.setSchedulingEndTime(unit.getEndTime().atDate(LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
-            workingSchedulingList.add(workingScheduling);
-        }
-        workingSchedulingService.saveBatch(workingSchedulingList);
-        return ResultUtils.success(units);
+    public BaseResponse<?> test(String dataStr) {
+        List<WorkingScheduling> workingSchedulingList = workingSchedulingDao.selectWorkingSchedulingByDate(dataStr);
+        return ResultUtils.success(workingSchedulingList);
     }
 }
 

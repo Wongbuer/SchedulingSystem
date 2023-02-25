@@ -1,7 +1,6 @@
 package com.wong.ffwb.scheduling_system.service;
 
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wong.ffwb.scheduling_system.common.BaseResponse;
 import com.wong.ffwb.scheduling_system.common.PageRequest;
@@ -26,5 +25,7 @@ public interface WorkingSchedulingService extends IService<WorkingScheduling> {
     BaseResponse<Boolean> updateOne(WorkingScheduling workingScheduling);
 
     BaseResponse<Boolean> delete(List<Long> idList);
+
+    BaseResponse<List<WorkingScheduling>> getSchedulingByDay(String dateStr);
 }
 

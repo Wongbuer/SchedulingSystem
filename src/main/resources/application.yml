@@ -21,7 +21,7 @@ mybatis-plus:
       id-type: assign_id
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
   mapper-locations: classpath:/mapper/**/*.xml
 knife4j:
   setting:
@@ -29,3 +29,7 @@ knife4j:
   enable: true
 amap:
   key: 6931e9a17412b231089648fb2d8bc55f
+logging:
+  level:
+    root: info
+    com.wong.ffwb.scheduling_system: debug
